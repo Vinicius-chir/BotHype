@@ -6,6 +6,21 @@ import os
 from datetime import datetime, timedelta
 from collections import defaultdict
 
+# Planilha do Google
+import gspread
+from google.oauth2.service_account import Credentials
+
+scopes = [
+    "https://www.googleapis.com/auth/spreadsheets"
+]
+# A credencial e o id devem mudar para o bot serio
+cred = Credentials.from_service_account_file("credencial_teste.json", scopes=scopes)
+client = gspread.authorize(cred)
+sheet_id = "1vSCJAxKV7DqLsNzeqRjfT_1Vpd6U4U1bHlTjVT4iAgM"
+sheet = client.open_by_key(sheet_id)
+aba = sheet.worksheet("Presenca")
+
+
 load_dotenv()
 discord_token = os.getenv('DISCORD_TOKEN')
 
@@ -42,6 +57,15 @@ class BotHype(discord.Client):
                 if entrada:
                     self.historico_presencas[member.id].append((entrada, now))
                     tempo_total = now - entrada
+                    linha = [
+                        member.display_name,
+                        str(bot_channel),
+                        entrada.strftime("%Y-%m-%d %H:%M:%S"),
+                        now.strftime("%Y-%m-%d %H:%M:%S"),
+                        str(tempo_total)[:7]
+                        
+                    ]
+                    aba.append_row(linha)
                     await canal_testes_id.send(
                         f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {member.display_name} saiu de {bot_channel.name} (Tempo em call: {tempo_total})"
                     )
@@ -52,6 +76,7 @@ bot = BotHype()
 async def Exibircomandos(interaction: discord.Interaction):
     await interaction.response.send_message("No momento não tenho nenhum comando, mas no futuro serei capaz de registrar em planilhas quem apareceu em chamadas de discord")
 
+
 @bot.tree.command(name="registrar", description="O bot irá entrar na chamada e irá registrar os membros presentes")
 async def registrar(interaction: discord.Interaction):
     now = datetime.now()
@@ -61,7 +86,6 @@ async def registrar(interaction: discord.Interaction):
         await channel.connect()
         await interaction.response.send_message(f'Entrei no canal de voz: {channel.name}')
 
-        # Registrar quem já está presente
         for member in channel.members:
             if not member.bot:
                 bot.presenca_estado[member.id] = now
