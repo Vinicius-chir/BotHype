@@ -50,7 +50,7 @@ class BotHype(discord.Client):
         if before.channel != after.channel:
             if after.channel == bot_channel and before.channel != bot_channel:
                 self.presenca_estado[member.id] = now
-                await canal_testes_id.send(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {member.display_name} entrou em {bot_channel.name}")
+                # await canal_testes_id.send(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {member.display_name} entrou em {bot_channel.name}") "Avisa no discord quando um menbro entra em call"
 
             elif before.channel == bot_channel and after.channel != bot_channel:
                 entrada = self.presenca_estado.pop(member.id, None)
@@ -66,15 +66,13 @@ class BotHype(discord.Client):
                         
                     ]
                     aba.append_row(linha)
-                    await canal_testes_id.send(
-                        f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {member.display_name} saiu de {bot_channel.name} (Tempo em call: {tempo_total})"
-                    )
+                    # await canal_testes_id.send(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {member.display_name} saiu de {bot_channel.name} (Tempo em call: {tempo_total})") "Avisa no discord quando um menbro sai da call"
 
 bot = BotHype()
 
 @bot.tree.command(name="comandos", description="Lista os comandos que o BotHype tem disponível")
 async def Exibircomandos(interaction: discord.Interaction):
-    await interaction.response.send_message("No momento não tenho nenhum comando, mas no futuro serei capaz de registrar em planilhas quem apareceu em chamadas de discord")
+    await interaction.response.send_message("Use /registrar para registrar os membros presentes no canal de voz, e /sair quando a call terminar.\n")
 
 
 @bot.tree.command(name="registrar", description="O bot irá entrar na chamada e irá registrar os membros presentes")
@@ -84,13 +82,13 @@ async def registrar(interaction: discord.Interaction):
     if interaction.user.voice:
         channel = interaction.user.voice.channel
         await channel.connect()
-        await interaction.response.send_message(f'Entrei no canal de voz: {channel.name}')
+        await interaction.response.send_message(f'Entrei no canal de voz: {channel.name}') 
 
         for member in channel.members:
             if not member.bot:
                 bot.presenca_estado[member.id] = now
                 canal_testes_id = bot.get_channel(1364736443628654614)
-                await canal_testes_id.send(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {member.display_name} já estava presente em {channel.name}")
+                # await canal_testes_id.send(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {member.display_name} já estava presente em {channel.name}")
 
         bot.current_voice_channel = channel
     else:
